@@ -13,7 +13,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api")
 public class StatusController {
 
-    public record SaludoRequest(String nombre) {}
+    public record SaludoRequest(String nombre) {
+
+    }
 
     @GetMapping("/status")
     public Map<String, String> getStatus() {
@@ -27,6 +29,7 @@ public class StatusController {
     public Map<String, String> saludar(@RequestBody SaludoRequest request) {
         Map<String, String> response = new HashMap<>();
 
+        // FIX / CORRECCIÓN: Validación contra valores nulos o vacíos
         if (request == null || request.nombre() == null || request.nombre().trim().isEmpty()) {
             response.put("error", "El campo 'nombre' es obligatorio y no puede estar vacio.");
             return response;
