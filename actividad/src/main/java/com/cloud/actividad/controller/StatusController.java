@@ -29,7 +29,7 @@ public class StatusController {
     @GetMapping("/status")
     public String saludo(@AuthenticationPrincipal Jwt jwt) {
         var usuario = jwt.getClaims();
-        return "hola mundo - correccion bug v1.1.1 usuario autenticado: " + usuario;
+        return "Hola Mundo!: Versión 2.1.0 del MS; Manejo de Autenticación mediante AWS " + usuario;
     }
 
     // 3. Endpoint POST (Conserva la lógica del Body e incluye los datos del token)
