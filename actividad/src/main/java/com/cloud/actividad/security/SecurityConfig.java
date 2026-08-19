@@ -1,10 +1,5 @@
 package com.cloud.actividad.security;
 
-import java.nio.charset.StandardCharsets;
-
-import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,30 +13,27 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableWebSecurity
 public class SecurityConfig {
 
-    @Value("${jwt.secret}")
-    private String secretString;
-
-    private SecretKey getSigningKey() {
-        // Genera la clave usando la librería nativa de Java JDK sin requerir JJWT
-        return new SecretKeySpec(secretString.getBytes(StandardCharsets.UTF_8), "HmacSHA256");
-    }
+    @Value("${spring.security.oauth2.resourceserver.jwt.issuer-uri}")
+    private String issuerUri;
 
     @Bean
     public JwtDecoder jwtDecoder() {
-        return NimbusJwtDecoder.withSecretKey(getSigningKey()).build();
+        // Spring Boot descargará automáticamente las llaves públicas (JWKS) desde Cognito para validar la firma
+        return NimbusJwtDecoder.withJwkSetUri(issuerUri + "/.well-known/jwks.json").build();
     }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable())
-                .authorizeHttpRequests(authorize -> authorize
+            .csrf(csrf -> csrf.disable())
+            .authorizeHttpRequests(authorize -> authorize
                 .requestMatchers("/api/v1/public").permitAll()
                 .anyRequest().authenticated()
-                )
-                .oauth2ResourceServer(oauth2 -> oauth2
+            )
+            .oauth2ResourceServer(oauth2 -> oauth2
                 .jwt(jwt -> jwt.decoder(jwtDecoder()))
-                );
+            );
+
         return http.build();
     }
 }

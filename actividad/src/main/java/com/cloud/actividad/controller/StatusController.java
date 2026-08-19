@@ -15,11 +15,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v1")
 public class StatusController {
 
-    public record SaludoRequest(String nombre) {
+    public record SaludoRequest(String nombre) { }
 
-    }
-
-    // 1. Endpoint Público (No requiere Token JWT)
+    // 1. Endpoint Público (Sin validación)
     @GetMapping("/public")
     public Map<String, String> endpointPublico() {
         Map<String, String> response = new HashMap<>();
@@ -27,20 +25,17 @@ public class StatusController {
         return response;
     }
 
-    // 2. Endpoint Protegido GET (Valida el Token y extrae el usuario)
+    // 2. Endpoint GET requerido por la nueva guía (Retorna la cadena con todos los claims de Cognito)
     @GetMapping("/status")
-    public Map<String, String> getStatus(@AuthenticationPrincipal Jwt jwt) {
-        Map<String, String> response = new HashMap<>();
-        response.put("status", "UP");
-        response.put("mensaje", "Microservicio activo y funcionando");
-        response.put("usuarioAutenticado", jwt.getSubject()); // Extrae 'sub' del JWT
-        return response;
+    public String saludo(@AuthenticationPrincipal Jwt jwt) {
+        var usuario = jwt.getClaims();
+        return "hola mundo - correccion bug v1.1.1 usuario autenticado: " + usuario;
     }
 
-    // 3. Endpoint Protegido POST (Valida el Token y la lógica de negocio)
+    // 3. Endpoint POST (Conserva la lógica del Body e incluye los datos del token)
     @PostMapping("/saludo")
-    public Map<String, String> saludar(@RequestBody SaludoRequest request, @AuthenticationPrincipal Jwt jwt) {
-        Map<String, String> response = new HashMap<>();
+    public Map<String, Object> saludar(@RequestBody SaludoRequest request, @AuthenticationPrincipal Jwt jwt) {
+        Map<String, Object> response = new HashMap<>();
 
         if (request == null || request.nombre() == null || request.nombre().trim().isEmpty()) {
             response.put("error", "El campo 'nombre' es obligatorio y no puede estar vacio.");
@@ -48,7 +43,8 @@ public class StatusController {
         }
 
         response.put("mensaje", "Hola " + request.nombre());
-        response.put("usuarioAutenticado", jwt.getSubject()); // Extrae 'sub' del JWT
+        response.put("usuarioSub", jwt.getSubject());
+        response.put("cognitoClaims", jwt.getClaims()); // Muestra todos los claims emitidos por Cognito
         return response;
     }
 }

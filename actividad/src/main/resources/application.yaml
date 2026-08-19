@@ -4,6 +4,8 @@ server:
 spring:
   application:
     name: actividad
-
-jwt:
-  secret: EstaEsUnaClaveSuperSeguraDe32Caracteres123!
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: https://cognito-idp.us-east-1.amazonaws.com/us-east-1_LrFQXBwq7
