@@ -16,10 +16,13 @@ public class SecurityConfig {
     @Value("${spring.security.oauth2.resourceserver.jwt.issuer-uri}")
     private String issuerUri;
 
+    @Value("${spring.security.oauth2.resourceserver.jwt.tenant-id}")
+    private String tenantId;
+
     @Bean
     public JwtDecoder jwtDecoder() {
-        // Spring Boot descargará automáticamente las llaves públicas (JWKS) desde Cognito para validar la firma
-        return NimbusJwtDecoder.withJwkSetUri(issuerUri + "/.well-known/jwks.json").build();
+        String jwkSetUri = issuerUri + tenantId + "/discovery/v2.0/keys";
+        return NimbusJwtDecoder.withJwkSetUri(jwkSetUri).build();
     }
 
     @Bean

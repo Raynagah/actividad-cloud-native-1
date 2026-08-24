@@ -17,7 +17,6 @@ public class StatusController {
 
     public record SaludoRequest(String nombre) { }
 
-    // 1. Endpoint Público (Sin validación)
     @GetMapping("/public")
     public Map<String, String> endpointPublico() {
         Map<String, String> response = new HashMap<>();
@@ -25,14 +24,12 @@ public class StatusController {
         return response;
     }
 
-    // 2. Endpoint GET requerido por la nueva guía (Retorna la cadena con todos los claims de Cognito)
     @GetMapping("/status")
     public String saludo(@AuthenticationPrincipal Jwt jwt) {
         var usuario = jwt.getClaims();
-        return "Hola Mundo!: Versión 2.1.0 del MS; Manejo de Autenticación mediante AWS " + usuario;
+        return "hola mundo - autenticado con Azure AD: " + usuario;
     }
 
-    // 3. Endpoint POST (Conserva la lógica del Body e incluye los datos del token)
     @PostMapping("/saludo")
     public Map<String, Object> saludar(@RequestBody SaludoRequest request, @AuthenticationPrincipal Jwt jwt) {
         Map<String, Object> response = new HashMap<>();
@@ -44,7 +41,7 @@ public class StatusController {
 
         response.put("mensaje", "Hola " + request.nombre());
         response.put("usuarioSub", jwt.getSubject());
-        response.put("cognitoClaims", jwt.getClaims()); // Muestra todos los claims emitidos por Cognito
+        response.put("azureClaims", jwt.getClaims());
         return response;
     }
 }
